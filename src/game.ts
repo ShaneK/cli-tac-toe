@@ -1,7 +1,7 @@
 export enum TokenType {
-  X = 'X',
-  O = 'O',
-  Empty = ' '
+  X = "X",
+  O = "O",
+  Empty = " ",
 }
 export type Coordinate = {
   x: number;
@@ -52,14 +52,14 @@ export class Game {
    * Check if the game is won. Output identifies the winning token if so.
    */
   public isWon(): WinVictoryOutput {
-    // Default output
+    // Output storage
     let output: WinVictoryOutput = {
-      isWon: false
+      isWon: false,
     };
 
     // Horizontal victory condition
-    this.boardState.forEach(row => {
-      output = this.isWinningTokenTypeset(row);
+    this.boardState.forEach((row) => {
+      output = this.isWinningTokenTypeSet(row);
     });
 
     if (output.isWon) {
@@ -69,24 +69,27 @@ export class Game {
     // Vertical victory condition
     for (let column = 0; column < Game.boardWidth; column++) {
       const columnData = this.getColumn(column);
-      output = this.isWinningTokenTypeset(columnData);
+      output = this.isWinningTokenTypeSet(columnData);
       if (output.isWon) {
         return output;
       }
     }
 
-    // Diagnoal victory condition
+    // Diagonal victory condition
+    const diagonalValues = this.boardState.map((row, index) => {
+      return row[index];
+    });
 
-    return output;
+    return this.isWinningTokenTypeSet(diagonalValues);
   }
 
   /**
    * Check a token type array to see if all of the values in the array are either X or O
    * @param types
    */
-  public isWinningTokenTypeset(types: TokenType[]): WinVictoryOutput {
+  public isWinningTokenTypeSet(types: TokenType[]): WinVictoryOutput {
     const output: WinVictoryOutput = {
-      isWon: false
+      isWon: false,
     };
 
     if (types.every((value) => value === TokenType.X)) {
@@ -110,9 +113,12 @@ export class Game {
       return [];
     }
 
-    return this.boardState.map(row => row[index] ?? TokenType.Empty);
+    return this.boardState.map((row) => row[index] ?? TokenType.Empty);
   }
 
+  /**
+   * Output board state in an easy to scan way
+   */
   public toString(): string {
     for (let y = 0; y < Game.boardHeight; y++) {
       console.log(this.boardState[y].join(" | "));
