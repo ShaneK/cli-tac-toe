@@ -7,9 +7,10 @@ export type Coordinate = {
   x: number;
   y: number;
 };
-export type WinVictoryOutput = {
+export type GameStateOutput = {
   token?: TokenType.X | TokenType.O;
   isWon: boolean;
+  isDrawn?: boolean;
 };
 
 export class Game {
@@ -44,21 +45,22 @@ export class Game {
   }
 
   /**
-   * Check if the game is won. Output identifies the winning token if so.
+   * Check if the game is over either by draw or victory.
    */
-  public isWon(): WinVictoryOutput {
+  public get currentVictoryState(): GameStateOutput {
     // Output storage
-    let output: WinVictoryOutput = {
+    let output: GameStateOutput = {
       isWon: false,
     };
 
     // Horizontal victory condition
-    this.boardState.forEach((row) => {
+    for (let i = 0; i < this.boardState.length; i++){
+      const row = this.boardState[i];
       output = this.isWinningTokenTypeSet(row);
-    });
 
-    if (output.isWon) {
-      return output;
+      if (output.isWon) {
+        return output;
+      }
     }
 
     // Vertical victory condition
@@ -73,20 +75,35 @@ export class Game {
 
     // Diagonal victory condition
     const diagonalValues = this.boardState.map((row, index) => {
-      // This will be getting the x, y at the same index, which will get us all of the
+      // This will be getting the x and y at the same index, which will get us all of the
       // diagonal values across the board
       return row[index];
     });
 
-    return this.isWinningTokenTypeSet(diagonalValues);
+    output = this.isWinningTokenTypeSet(diagonalValues);
+    if (output.isWon) {
+      return output;
+    }
+
+    output.isDrawn = this.isFull;
+    return output;
+  }
+
+  /**
+   * Determines if the board is full
+   */
+  public get isFull(): boolean {
+    return this.boardState.every(row => {
+      return row.every(rowColumnValue => rowColumnValue !== TokenType.Empty);
+    })
   }
 
   /**
    * Check a token type array to see if all of the values in the array are either X or O
    * @param types
    */
-  public isWinningTokenTypeSet(types: TokenType[]): WinVictoryOutput {
-    const output: WinVictoryOutput = {
+  public isWinningTokenTypeSet(types: TokenType[]): GameStateOutput {
+    const output: GameStateOutput = {
       isWon: false,
     };
 
@@ -119,12 +136,13 @@ export class Game {
    */
   public toString(): string {
     let output = '';
-    for (let y = 0; y < Game.boardHeight; y++) {
-      output += this.boardState[y].join(" | ");
-      if (y < Game.boardHeight - 1) {
-        output += "\n-----------\n";
+    this.boardState.forEach((row, index) => {
+      output += row.join(" | ");
+
+      if (index < Game.boardHeight - 1) {
+        output += "\n----------\n";
       }
-    }
+    });
 
     return output;
   }
