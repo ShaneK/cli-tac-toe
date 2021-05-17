@@ -19,13 +19,8 @@ export class Game {
 
   constructor() {
     for (let y = 0; y < Game.boardHeight; y++) {
-      if (!this.boardState[y]) {
-        this.boardState[y] = [];
-      }
-
-      for (let x = 0; x < Game.boardWidth; x++) {
-        this.boardState[y][x] = TokenType.Empty;
-      }
+      this.boardState[y] = new Array<TokenType>(Game.boardWidth);
+      this.boardState[y].fill(TokenType.Empty);
     }
   }
 
@@ -68,6 +63,7 @@ export class Game {
 
     // Vertical victory condition
     for (let column = 0; column < Game.boardWidth; column++) {
+      // Get each column in the board and check to see if it's a winner
       const columnData = this.getColumn(column);
       output = this.isWinningTokenTypeSet(columnData);
       if (output.isWon) {
@@ -77,6 +73,8 @@ export class Game {
 
     // Diagonal victory condition
     const diagonalValues = this.boardState.map((row, index) => {
+      // This will be getting the x, y at the same index, which will get us all of the
+      // diagonal values across the board
       return row[index];
     });
 
@@ -120,13 +118,14 @@ export class Game {
    * Output board state in an easy to scan way
    */
   public toString(): string {
+    let output = '';
     for (let y = 0; y < Game.boardHeight; y++) {
-      console.log(this.boardState[y].join(" | "));
+      output += this.boardState[y].join(" | ");
       if (y < Game.boardHeight - 1) {
-        console.log("-----------");
+        output += "\n-----------\n";
       }
     }
 
-    return "";
+    return output;
   }
 }
